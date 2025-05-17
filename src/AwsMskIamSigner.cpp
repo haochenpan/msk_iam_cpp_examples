@@ -7,7 +7,7 @@
 #include <openssl/buffer.h>
 #include <cstring>
 
-std::string base64UrlEncode(const std::string &input)
+static std::string base64UrlEncode(const std::string &input)
 {
     BIO *b64 = BIO_new(BIO_f_base64());
     BIO *mem = BIO_new(BIO_s_mem());

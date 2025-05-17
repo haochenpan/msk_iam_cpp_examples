@@ -17,33 +17,35 @@ static int is_printable(const char *buf, size_t size)
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    if (argc < 3 || argc > 4)
     {
-        std::cerr << "Usage: " << argv[0] << " <topic> <group.id>\n";
+        std::cerr << "Usage: " << argv[0] << " <topic> <group.id> [earliest|latest]\n";
         return 1;
     }
 
-    const char* required_env_vars[] = {
+    const char *required_env_vars[] = {
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "AWS_REGION",
-        "OCTOPUS_BOOTSTRAP_SERVERS"
-    };
-    for (const char* var : required_env_vars) {
-        if (!std::getenv(var)) {
+        "OCTOPUS_BOOTSTRAP_SERVERS"};
+
+    for (const char *var : required_env_vars)
+    {
+        if (!std::getenv(var))
+        {
             std::cerr << "Missing required environment variable: " << var << std::endl;
             return 1;
         }
     }
 
     const char *brokers = std::getenv("OCTOPUS_BOOTSTRAP_SERVERS");
-    if (!brokers)
+    const char *topic = argv[1], *group_id = argv[2];
+    const char *offset_reset = (argc == 4) ? argv[3] : "latest";
+    if (strcmp(offset_reset, "earliest") != 0 && strcmp(offset_reset, "latest") != 0)
     {
-        std::cerr << "OCTOPUS_BOOTSTRAP_SERVERS not set\n";
+        std::cerr << "Invalid offset value: " << offset_reset << " (expected 'earliest' or 'latest')\n";
         return 1;
     }
-
-    const char *topic = argv[1], *group_id = argv[2]; //, *group_protocol = argv[3];
 
     Aws::SDKOptions options;
     Aws::InitAPI(options);
@@ -53,10 +55,11 @@ int main(int argc, char **argv)
 
     rd_kafka_conf_set(conf, "bootstrap.servers", brokers, errstr, sizeof(errstr));
     rd_kafka_conf_set(conf, "group.id", group_id, errstr, sizeof(errstr));
-    // rd_kafka_conf_set(conf, "group.protocol", group_protocol, errstr, sizeof(errstr));
     rd_kafka_conf_set(conf, "security.protocol", "SASL_SSL", errstr, sizeof(errstr));
     rd_kafka_conf_set(conf, "sasl.mechanisms", "OAUTHBEARER", errstr, sizeof(errstr));
-    rd_kafka_conf_set(conf, "auto.offset.reset", "earliest", errstr, sizeof(errstr));
+    rd_kafka_conf_set(conf, "auto.offset.reset", offset_reset, errstr, sizeof(errstr));
+    rd_kafka_conf_set(conf, "enable.auto.commit", "true", errstr, sizeof(errstr));
+    rd_kafka_conf_set(conf, "auto.commit.interval.ms", "5000", errstr, sizeof(errstr));
 
     rd_kafka_conf_set_oauthbearer_token_refresh_cb(conf, [](rd_kafka_t *rk, const char *, void *)
                                                    {

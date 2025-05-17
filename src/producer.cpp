@@ -30,25 +30,22 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    const char* required_env_vars[] = {
+    const char *required_env_vars[] = {
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "AWS_REGION",
-        "OCTOPUS_BOOTSTRAP_SERVERS"
-    };
-    for (const char* var : required_env_vars) {
-        if (!std::getenv(var)) {
+        "OCTOPUS_BOOTSTRAP_SERVERS"};
+
+    for (const char *var : required_env_vars)
+    {
+        if (!std::getenv(var))
+        {
             std::cerr << "Missing required environment variable: " << var << std::endl;
             return 1;
         }
     }
-    
+
     const char *brokers = std::getenv("OCTOPUS_BOOTSTRAP_SERVERS");
-    if (!brokers)
-    {
-        std::cerr << "OCTOPUS_BOOTSTRAP_SERVERS environment variable not set." << std::endl;
-        return 1;
-    }
     const char *topic = argv[1];
     const char *test_message = argv[2];
 
@@ -69,7 +66,7 @@ int main(int argc, char **argv)
 
     rd_kafka_conf_set(conf, "security.protocol", "SASL_SSL", errstr, sizeof(errstr));
     rd_kafka_conf_set(conf, "sasl.mechanisms", "OAUTHBEARER", errstr, sizeof(errstr));
-    rd_kafka_conf_set(conf, "debug", "all", errstr, sizeof(errstr));
+    // rd_kafka_conf_set(conf, "debug", "all", errstr, sizeof(errstr));
 
     rd_kafka_conf_set_oauthbearer_token_refresh_cb(conf, [](rd_kafka_t *rk, const char *oauthbearer_config, void *opaque)
                                                    {
@@ -103,7 +100,6 @@ int main(int argc, char **argv)
         Aws::ShutdownAPI(options);
         return 1;
     }
-    rd_kafka_set_log_level(rk, SO_DEBUG);
 
     size_t len = strlen(test_message);
     rd_kafka_resp_err_t err = rd_kafka_producev(

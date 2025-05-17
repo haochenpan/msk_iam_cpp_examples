@@ -80,7 +80,7 @@ Before running the producer or consumer, make sure the following environment var
 export AWS_ACCESS_KEY_ID="your-access-key-id"
 export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
 export AWS_REGION="us-east-1"
-export OCTOPUS_BOOTSTRAP_SERVERS="b-1-public.example.amazonaws.com:9198,b-2-public.example.amazonaws.com:9198"
+export OCTOPUS_BOOTSTRAP_SERVERS="b-1-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198,b-2-public.diaspora.jdqn8o.c18.kafka.us-east-1.amazonaws.com:9198"
 ```
 
 ---
@@ -112,13 +112,15 @@ Example:
 ### Run the consumer
 
 ```bash
-./consumer <topic> <group.id> 
+./consumer <topic> <group.id> [earliest|latest]
 ```
+
+If `earliest` or `latest` is not specified, the default is `latest`.
 
 Example:
 
 ```bash
-./consumer tomo-alpha-1 group-1
+./consumer tomo-alpha-1 group-1 earliest
 ```
 
 Make sure the environment variables listed in section 4 are set before running either binary.

@@ -15,18 +15,20 @@ sudo apt-get install -y libssl-dev libsasl2-dev build-essential \
 
 Check CMake version
 ```bash
-cmake --version
+cmake --version  # cmake version 3.22.1
 ```
 
 Check C++17 support
 ```bash
 g++ -std=c++17 -dM -E - < /dev/null | grep __cplusplus
+# cc1: warning: command-line option ‘-std=c++17’ is valid for C++/ObjC++ but not for C
 ```
 
 
 ## 2. Install librdkafka from Source
 
 ```bash
+cd ~
 git clone https://github.com/confluentinc/librdkafka.git
 cd librdkafka
 git checkout v2.10.0 # the most recent version
@@ -41,8 +43,6 @@ Verify installation:
 ls /usr/local/lib | grep kafka
 ls /usr/local/include/librdkafka/rdkafka.h
 ls /usr/local/include/librdkafka/rdkafkacpp.h
-find /usr/include -name "rdkafka*.h"
-ldconfig -p | grep rdkafka
 ```
 
 
@@ -56,7 +56,7 @@ git submodule update --init --recursive
 mkdir build && cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=Release \
-         -DBUILD_ONLY="sts;ec2" \
+         -DBUILD_ONLY="core" \
          -DENABLE_UNITY_BUILD=ON \
          -DBUILD_SHARED_LIBS=ON \
          -DCMAKE_INSTALL_PREFIX=/usr/local
